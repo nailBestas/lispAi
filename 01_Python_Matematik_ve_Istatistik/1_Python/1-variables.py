@@ -12,4 +12,16 @@
     soylemekte fayda var python da yorum satirlari yani kodeditorunun es gecegi 2 yol vadrdir
     1 # isareti digeri (''' ''')isaretidir
     '''
+#Dikkat degisken isimleri python anahtar sozluklari ile ayni olammalidir
 
+'''
+Yanlis kullanim
+print = 10 
+int = 150
+str = '44aa'  
+gibi ornekelr hatali kullamdir
+'''
+#dogru kullanim
+print_var = "selam"
+print_int = 45
+int_var = 101

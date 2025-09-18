@@ -49,10 +49,14 @@ print(5 % -3)# bu sonuc biraz karmasiktir ve sonuc -1 olur denkleme gore yapiyor
 #5-standart hileler
 print(0.1 + 0.2)#sonuc 0.3 gostermesi gerekirken 0.30000000000000004 bu aslinda python ile ilgili degildir virgulli sayilarin bilgisayar deposunda saklanma seklidir
 
+#Not Oncelik sirasi 
+#İşlem sırası (1) üs alma, (2) çarpma, (3) bölme, (4) toplama ve (5) çıkarma şeklindedir.
+print(1 + 2 * 5**2)#sonuc 51 olur
 
-
-
-
+x = 1
+y = 2
+z = 3
+print((x * y) ** z / 8)#once parantez ici sonra us sonrada bolme
 
 
 #sonuclari ve turlerini sirasiyla bize verecektir
