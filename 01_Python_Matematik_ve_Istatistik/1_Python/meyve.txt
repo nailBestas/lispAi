@@ -1,1 +1,6 @@
-armut elma portakal mandalina karpuz nar
+pear
+apple
+orange
+mandarin
+watermelon
+pomegranate
