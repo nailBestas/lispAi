@@ -3,7 +3,7 @@
 #diger farki eleman bulmak ve indexkemek icin [..dize mantigi degil][anahtar degeri girmek lazim "nail"]
 keysPin  = {"nail":1985, "arya":2017, "ceylin":2021}
 print(keysPin)
-print(keysPin["nail"])
+print(keysPin["nail"])#anahtar degeri ile degere ulasiyoruz
 print(keysPin["arya"])
 print(keysPin["ceylin"])
 print(keysPin.keys())#anahtar keilimelerin ne oldugunu dict_keys(['nail', 'arya', 'ceylin'])bize gosterir
