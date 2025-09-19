@@ -48,20 +48,21 @@ elif user_input < 10 :
     print('lutfen 10 dan buyuk sayi giriniz :')       
 
 #baska bir ornek
-score = 50
+score = 80
+#basari_harf = ""#istersek onceden degisken atamasi bos olarak girebilirz istersek dongudede atayabiliriz
 
 if score >= 90:
-    grade = "A"
+    basari_harf = "A"
 elif score >= 80:
-    grade = "B"
+    basari_harf = "B"
 elif score >= 70:
-    grade = "C"
+    basari_harf = "C"
 elif score >= 60:
-    grade = "D"
+    basari_harf = "D"
 else :
-    grade = "F"
+    basari_harf = "F"
 
-print("Your grade is:", grade)             
+print("Basari durumunuz:", basari_harf , "sinifi gectiniz")             
 
 # NOTlaar
 # Bir if ifadesi tek basina kullanilabilir ama else asla olmaz
