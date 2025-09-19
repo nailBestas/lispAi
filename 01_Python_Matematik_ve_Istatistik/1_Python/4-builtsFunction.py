@@ -16,7 +16,7 @@ print(int(x+y))#toplamı 10.2 ama ınt fonskyonu yuvarlak yaptı sayıyı
 
 '''
 11
-11.0
+11.
 100
 300
 11
