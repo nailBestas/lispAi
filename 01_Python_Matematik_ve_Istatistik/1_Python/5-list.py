@@ -100,5 +100,5 @@ print(mytuple)
 
 #Tam olarak bir istisna gibi:list
 #1. Tanımlama grubunu tanımlamak için köşeli parantez yerine parantez kullanırsınız.
-#2. Bir tuple değiştirilemez, yani listelerde olduğu gibi tuple ye  öğe ekleyemez veya kaldıramazsınız. Bir demete yöntem eklemeye çalışmak bir hata verir:append
-#3. Tuple'lar nadiren kullanılır. Ancak, gerçekten değiştirilmesini istemediğimiz bir listeye ihtiyacınız olursa, liste yerine demet kullanmak iyi bir fikirdir.
+#2. Bir tuple değiştirilemez, yani listelerde olduğu gibi tuple ye  öğe ekleyemez veya kaldıramazsınız. Bir tuple yöntem eklemeye çalışmak bir hata verir:append
+#3. Tuple'lar nadiren kullanılır. Ancak, gerçekten değiştirilmesini istemediğimiz bir listeye ihtiyacınız olursa, liste yerine tuple kullanmak iyi bir fikirdir.
