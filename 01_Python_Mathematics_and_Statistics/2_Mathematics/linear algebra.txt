@@ -1,0 +1,404 @@
+# 📁 piro_linear_algebra_complete.py
+"""
+Piro AI - Complete Linear Algebra Library
+Piro AI - Tam Lineer Cebir Kütüphanesi
+
+Kapsanan Konular / Covered Topics:
+1. Vektörler / Vectors
+2. Matrisler / Matrices  
+3. Determinant ve Ters / Determinant and Inverse
+4. Özdeğer ve Özvektörler / Eigenvalues and Eigenvectors
+5. Lineer Denklem Sistemleri / Linear Equation Systems
+6. Matris Ayrıştırmaları / Matrix Decompositions
+7. Vektör Uzayları / Vector Spaces
+8. Matris Normları / Matrix Norms
+9. İleri Uygulamalar / Advanced Applications
+"""
+
+import numpy as np
+import scipy.linalg
+from typing import Union, Tuple, List, Optional
+
+class PiroLinearAlgebra:
+    """Complete Linear Algebra Implementation for AI / AI için Tam Lineer Cebir Implementasyonu"""
+    
+    def __init__(self, data: Union[List, np.ndarray], name: str = "Matrix"):
+        """
+        Initialize matrix / Matrisi başlat
+        
+        Args:
+            data: Matrix data / Matris verisi
+            name: Matrix name / Matris adı
+        """
+        self.data = np.array(data, dtype=np.float64)
+        self.name = name
+        self._validate_matrix()
+    
+    def _validate_matrix(self):
+        """Validate matrix dimensions / Matris boyutlarını doğrula"""
+        if self.data.ndim != 2:
+            raise ValueError(f"❌ {self.name}: Matrix must be 2D / Matris 2 boyutlu olmalı!")
+    
+    # 🔷 1. VEKTÖR OPERASYONLARI / VECTOR OPERATIONS
+    @staticmethod
+    def vector_operations_demo():
+        """Demonstrate vector operations / Vektör operasyonlarını göster"""
+        print("=== 🔷 VEKTÖR OPERASYONLARI / VECTOR OPERATIONS ===")
+        
+        # Vector creation / Vektör oluşturma
+        v = np.array([1, 2, 3])
+        w = np.array([4, 5, 6])
+        
+        # Vector addition / Vektör toplama
+        sum_vec = v + w
+        print(f"Toplama / Addition: {v} + {w} = {sum_vec}")
+        
+        # Dot product / Nokta çarpım
+        dot_product = np.dot(v, w)
+        print(f"Nokta çarpım / Dot product: {v} · {w} = {dot_product}")
+        
+        # Cross product (3D only) / Çapraz çarpım (sadece 3D)
+        if len(v) == 3 and len(w) == 3:
+            cross_product = np.cross(v, w)
+            print(f"Çapraz çarpım / Cross product: {v} × {w} = {cross_product}")
+        
+        # Vector magnitude / Vektör büyüklüğü
+        magnitude = np.linalg.norm(v)
+        print(f"Büyüklük / Magnitude ||v|| = {magnitude:.2f}")
+        
+        # Unit vector / Birim vektör
+        unit_vector = v / magnitude
+        print(f"Birim vektör / Unit vector: {unit_vector}")
+    
+    # 🔷 2. MATRİS TEMEL OPERASYONLARI / MATRIX BASIC OPERATIONS
+    def __str__(self) -> str:
+        return f"🧮 {self.name} {self.data.shape}:\n{self.data}"
+    
+    def __add__(self, other: 'PiroLinearAlgebra') -> 'PiroLinearAlgebra':
+        """
+        Matrix addition / Matris toplama
+        A + B where A and B have same dimensions / A ve B aynı boyutta olmalı
+        """
+        if self.data.shape != other.data.shape:
+            raise ValueError("❌ Boyut uyumsuz / Dimension mismatch!")
+        return PiroLinearAlgebra(self.data + other.data, f"({self.name}+{other.name})")
+    
+    def __sub__(self, other: 'PiroLinearAlgebra') -> 'PiroLinearAlgebra':
+        """Matrix subtraction / Matris çıkarma"""
+        if self.data.shape != other.data.shape:
+            raise ValueError("❌ Boyut uyumsuz / Dimension mismatch!")
+        return PiroLinearAlgebra(self.data - other.data, f"({self.name}-{other.name})")
+    
+    def __matmul__(self, other: 'PiroLinearAlgebra') -> 'PiroLinearAlgebra':
+        """
+        Matrix multiplication / Matris çarpımı
+        A @ B where A.columns = B.rows / A sütun = B satır sayısı
+        """
+        if self.data.shape[1] != other.data.shape[0]:
+            raise ValueError(f"❌ Çarpım için uyumsuz boyutlar: {self.data.shape} @ {other.data.shape}")
+        return PiroLinearAlgebra(self.data @ other.data, f"({self.name}@{other.name})")
+    
+    def __mul__(self, other: Union[int, float, 'PiroLinearAlgebra']) -> 'PiroLinearAlgebra':
+        """
+        Scalar multiplication or element-wise multiplication / 
+        Skaler çarpım veya eleman-elemana çarpım
+        """
+        if isinstance(other, (int, float)):
+            return PiroLinearAlgebra(self.data * other, f"({self.name}×{other})")
+        else:
+            if self.data.shape != other.data.shape:
+                raise ValueError("❌ Boyut uyumsuz / Dimension mismatch!")
+            return PiroLinearAlgebra(self.data * other.data, f"({self.name}⊙{other.name})")
+    
+    @property
+    def T(self) -> 'PiroLinearAlgebra':
+        """Matrix transpose / Matris transpozu"""
+        return PiroLinearAlgebra(self.data.T, f"{self.name}ᵀ")
+    
+    # 🔷 3. DETERMINANT VE TERS / DETERMINANT AND INVERSE
+    @property
+    def determinant(self) -> float:
+        """Calculate determinant / Determinant hesapla"""
+        if not self.is_square:
+            raise ValueError("❌ Sadece kare matrislerin determinantı var! / Only square matrices have determinant!")
+        return np.linalg.det(self.data)
+    
+    @property
+    def inverse(self) -> 'PiroLinearAlgebra':
+        """Calculate matrix inverse / Matris tersini hesapla"""
+        if not self.is_square:
+            raise ValueError("❌ Sadece kare matrislerin tersi var! / Only square matrices have inverse!")
+        if abs(self.determinant) < 1e-10:
+            raise ValueError("❌ Matris singular - tersi yok! / Matrix is singular - no inverse!")
+        return PiroLinearAlgebra(np.linalg.inv(self.data), f"{self.name}⁻¹")
+    
+    @property
+    def is_square(self) -> bool:
+        """Check if matrix is square / Matris kare mi kontrol et"""
+        return self.data.shape[0] == self.data.shape[1]
+    
+    # 🔷 4. ÖZDEĞER VE ÖZVEKTÖRLER / EIGENVALUES AND EIGENVECTORS
+    def eigen_decomposition(self) -> Tuple[np.ndarray, 'PiroLinearAlgebra']:
+        """
+        Eigen decomposition: A = V Λ V⁻¹ / Özdeğer ayrıştırma
+        Returns eigenvalues and eigenvectors / Özdeğerleri ve özvektörleri döndürür
+        """
+        if not self.is_square:
+            raise ValueError("❌ Sadece kare matrislerin özdeğeri var! / Only square matrices have eigenvalues!")
+        
+        eigenvalues, eigenvectors = np.linalg.eig(self.data)
+        return eigenvalues, PiroLinearAlgebra(eigenvectors, f"eigvecs({self.name})")
+    
+    def verify_eigen_relation(self) -> bool:
+        """Verify A × v = λ × v relation / A × v = λ × v ilişkisini doğrula"""
+        try:
+            eigenvalues, eigenvectors = self.eigen_decomposition()
+            for i in range(len(eigenvalues)):
+                v = eigenvectors.data[:, i]
+                lambda_v = eigenvalues[i] * v
+                Av = self.data @ v
+                if not np.allclose(Av, lambda_v):
+                    return False
+            return True
+        except:
+            return False
+    
+    # 🔷 5. TEKİL DEĞER AYRIŞIMI (SVD) / SINGULAR VALUE DECOMPOSITION
+    def svd(self) -> Tuple['PiroLinearAlgebra', np.ndarray, 'PiroLinearAlgebra']:
+        """
+        Singular Value Decomposition: A = U Σ Vᵀ / Tekil Değer Ayrışımı
+        Returns U, singular values, Vᵀ / U, tekil değerler, Vᵀ döndürür
+        """
+        U, S, Vt = np.linalg.svd(self.data, full_matrices=False)
+        return (
+            PiroLinearAlgebra(U, f"U_{self.name}"),
+            S,
+            PiroLinearAlgebra(Vt, f"Vt_{self.name}")
+        )
+    
+    def low_rank_approximation(self, rank: int) -> 'PiroLinearAlgebra':
+        """
+        Low-rank approximation using SVD / SVD ile düşük ranklı yaklaşım
+        Useful for data compression / Veri sıkıştırma için kullanışlı
+        """
+        U, S, Vt = self.svd()
+        U_k = U.data[:, :rank]
+        S_k = np.diag(S[:rank])
+        Vt_k = Vt.data[:rank, :]
+        approximation = U_k @ S_k @ Vt_k
+        return PiroLinearAlgebra(approximation, f"rank{rank}_approx({self.name})")
+    
+    # 🔷 6. LİNEER DENKLEM SİSTEMLERİ / LINEAR EQUATION SYSTEMS
+    def solve(self, b: np.ndarray) -> 'PiroLinearAlgebra':
+        """
+        Solve linear system: A × x = b / Lineer sistemi çöz: A × x = b
+        Returns solution vector x / Çözüm vektörü x'i döndürür
+        """
+        if not self.is_square:
+            raise ValueError("❌ Sadece kare matris sistemleri çözülebilir! / Only square systems can be solved!")
+        
+        x = np.linalg.solve(self.data, b)
+        return PiroLinearAlgebra(x, f"solution({self.name})")
+    
+    def solve_least_squares(self, b: np.ndarray) -> 'PiroLinearAlgebra':
+        """
+        Solve overdetermined system using least squares / 
+        Aşırı belirlenmiş sistemi en küçük kareler ile çöz
+        """
+        x, residuals, rank, s = np.linalg.lstsq(self.data, b, rcond=None)
+        return PiroLinearAlgebra(x, f"lstsq_solution({self.name})")
+    
+    # 🔷 7. MATRİS AYRIŞTIRMALARI / MATRIX DECOMPOSITIONS
+    def lu_decomposition(self) -> Tuple['PiroLinearAlgebra', 'PiroLinearAlgebra', 'PiroLinearAlgebra']:
+        """
+        LU Decomposition: A = P L U / LU Ayrıştırma
+        Returns permutation matrix P, lower triangular L, upper triangular U /
+        Permütasyon matrisi P, alt üçgensel L, üst üçgensel U döndürür
+        """
+        P, L, U = scipy.linalg.lu(self.data)
+        return (
+            PiroLinearAlgebra(P, f"P_{self.name}"),
+            PiroLinearAlgebra(L, f"L_{self.name}"),
+            PiroLinearAlgebra(U, f"U_{self.name}")
+        )
+    
+    def qr_decomposition(self) -> Tuple['PiroLinearAlgebra', 'PiroLinearAlgebra']:
+        """
+        QR Decomposition: A = Q R / QR Ayrıştırma
+        Returns orthogonal Q, upper triangular R / 
+        Ortogonal Q, üst üçgensel R döndürür
+        """
+        Q, R = np.linalg.qr(self.data)
+        return PiroLinearAlgebra(Q, f"Q_{self.name}"), PiroLinearAlgebra(R, f"R_{self.name}")
+    
+    def cholesky_decomposition(self) -> 'PiroLinearAlgebra':
+        """
+        Cholesky Decomposition: A = L Lᵀ / Cholesky Ayrıştırma
+        For symmetric positive definite matrices / 
+        Simetrik pozitif tanımlı matrisler için
+        """
+        try:
+            L = np.linalg.cholesky(self.data)
+            return PiroLinearAlgebra(L, f"L_chol_{self.name}")
+        except np.linalg.LinAlgError:
+            raise ValueError("❌ Matris pozitif tanımlı değil! / Matrix not positive definite!")
+    
+    # 🔷 8. MATRİS NORMLARI / MATRIX NORMS
+    def norm(self, norm_type: str = 'fro') -> float:
+        """
+        Calculate matrix norms / Matris normları hesapla
+        
+        Args:
+            norm_type: 'fro' (Frobenius), 'spec' (Spectral), 'nuc' (Nuclear)
+        """
+        norms = {
+            'fro': np.linalg.norm(self.data, 'fro'),    # Frobenius norm
+            'spec': np.linalg.norm(self.data, 2),       # Spectral norm (largest singular value)
+            'nuc': np.linalg.norm(self.data, 'nuc'),    # Nuclear norm (sum of singular values)
+            '1': np.linalg.norm(self.data, 1),          # L1 norm (max column sum)
+            'inf': np.linalg.norm(self.data, np.inf),   # L∞ norm (max row sum)
+        }
+        return norms.get(norm_type, norms['fro'])
+    
+    # 🔷 9. VEKTÖR UZAYLARI / VECTOR SPACES
+    def rank(self) -> int:
+        """Matrix rank - number of linearly independent columns / Matris rankı - lineer bağımsız sütun sayısı"""
+        return np.linalg.matrix_rank(self.data)
+    
+    def null_space(self) -> 'PiroLinearAlgebra':
+        """Null space - solutions to A×x = 0 / Çekirdek - A×x = 0 çözümleri"""
+        U, S, Vt = np.linalg.svd(self.data)
+        tolerance = max(self.data.shape) * np.spacing(max(S))
+        null_mask = S <= tolerance
+        null_space = Vt[null_mask, :]
+        return PiroLinearAlgebra(null_space.T, f"null({self.name})")
+    
+    def column_space(self) -> 'PiroLinearAlgebra':
+        """Column space - all possible linear combinations of columns / Sütun uzayı - sütunların tüm lineer kombinasyonları"""
+        U, S, Vt = np.linalg.svd(self.data)
+        tolerance = max(self.data.shape) * np.spacing(max(S))
+        range_mask = S > tolerance
+        column_space = U[:, range_mask]
+        return PiroLinearAlgebra(column_space, f"col_space({self.name})")
+    
+    # 🔷 10. İLERİ UYGULAMALAR / ADVANCED APPLICATIONS
+    def pca(self, n_components: int = 2) -> 'PiroLinearAlgebra':
+        """
+        Principal Component Analysis / Temel Bileşen Analizi
+        Dimensionality reduction / Boyut indirgeme
+        """
+        # Standardize the data / Veriyi standardize et
+        X_std = (self.data - np.mean(self.data, axis=0)) / np.std(self.data, axis=0)
+        
+        # Covariance matrix / Kovaryans matrisi
+        cov_matrix = np.cov(X_std.T)
+        
+        # Eigen decomposition / Özdeğer ayrıştırma
+        eigenvalues, eigenvectors = np.linalg.eig(cov_matrix)
+        
+        # Sort by largest eigenvalues / En büyük özdeğerlere göre sırala
+        sorted_indices = np.argsort(eigenvalues)[::-1]
+        components = eigenvectors[:, sorted_indices[:n_components]]
+        
+        return PiroLinearAlgebra(components, f"PCA_{self.name}")
+    
+    def condition_number(self) -> float:
+        """Condition number - measure of numerical stability / Koşul sayısı - sayısal kararlılık ölçütü"""
+        return np.linalg.cond(self.data)
+    
+    def is_positive_definite(self) -> bool:
+        """Check if matrix is positive definite / Matris pozitif tanımlı mı kontrol et"""
+        try:
+            np.linalg.cholesky(self.data)
+            return True
+        except np.linalg.LinAlgError:
+            return False
+    
+    def is_symmetric(self) -> bool:
+        """Check if matrix is symmetric / Matris simetrik mi kontrol et"""
+        return np.allclose(self.data, self.data.T)
+    
+    def is_orthogonal(self) -> bool:
+        """Check if matrix is orthogonal / Matris ortogonal mi kontrol et"""
+        if not self.is_square:
+            return False
+        return np.allclose(self.data @ self.data.T, np.eye(self.data.shape[0]))
+
+# 🔥 KOMPLE TEST FONKSİYONU / COMPREHENSIVE TEST FUNCTION
+def test_complete_linear_algebra():
+    """Test all linear algebra features / Tüm lineer cebir özelliklerini test et"""
+    print("=== 🧪 TAM LİNEER CEBİR TESTİ / COMPLETE LINEAR ALGEBRA TEST ===")
+    
+    # 1. Vektör operasyonları / Vector operations
+    print("\n1. 🔷 VEKTÖR OPERASYONLARI / VECTOR OPERATIONS")
+    PiroLinearAlgebra.vector_operations_demo()
+    
+    # 2. Test matrisleri oluştur / Create test matrices
+    A = PiroLinearAlgebra([[4, 12, -16], [12, 37, -43], [-16, -43, 98]], "A")
+    B = PiroLinearAlgebra([[1, 2], [3, 4], [5, 6]], "B")
+    C = PiroLinearAlgebra([[2, 0], [0, 3]], "C")
+    
+    print(f"\n2. 🔷 MATRİS TEMELLERİ / MATRIX BASICS")
+    print(f"A: {A}")
+    print(f"B: {B}")
+    print(f"A boyutları / dimensions: {A.data.shape}")
+    print(f"B boyutları / dimensions: {B.data.shape}")
+    
+    print(f"\n3. 🔷 MATRİS OPERASYONLARI / MATRIX OPERATIONS")
+    print(f"A + A: {(A + A).data.shape}")
+    print(f"A × B: {(A @ B).data.shape}")
+    print(f"A transpozu / transpose: {A.T.data.shape}")
+    
+    print(f"\n4. 🔷 DETERMINANT VE TERS / DETERMINANT AND INVERSE")
+    print(f"det(A): {A.determinant:.2f}")
+    print(f"A⁻¹: {A.inverse.data.shape}")
+    print(f"A × A⁻¹ ≈ I: {np.allclose((A @ A.inverse).data, np.eye(3))}")
+    
+    print(f"\n5. 🔷 ÖZDEĞER AYRIŞIMI / EIGEN DECOMPOSITION")
+    eigenvalues, eigenvectors = A.eigen_decomposition()
+    print(f"Özdeğerler / Eigenvalues: {eigenvalues}")
+    print(f"Özdeğer ilişkisi doğru mu? / Eigen relation correct? {A.verify_eigen_relation()}")
+    
+    print(f"\n6. 🔷 SVD AYRIŞIMI / SVD DECOMPOSITION")
+    U, S, Vt = A.svd()
+    print(f"SVD: U{U.data.shape}, S{S.shape}, Vt{Vt.data.shape}")
+    
+    print(f"\n7. 🔷 LİNEER SİSTEM ÇÖZÜMÜ / LINEAR SYSTEM SOLUTION")
+    b = np.array([1, 2, 3])
+    x = A.solve(b)
+    print(f"A × x = b, x: {x.data}")
+    print(f"Doğrulama / Verification A×x ≈ b: {np.allclose(A.data @ x.data, b)}")
+    
+    print(f"\n8. 🔷 MATRİS AYRIŞTIRMALARI / MATRIX DECOMPOSITIONS")
+    L, U = A.lu_decomposition()[1:]  # Skip permutation matrix / Permütasyon matrisini atla
+    print(f"LU: L{L.data.shape}, U{U.data.shape}")
+    
+    Q, R = B.qr_decomposition()
+    print(f"QR: Q{Q.data.shape}, R{R.data.shape}")
+    
+    print(f"\n9. 🔷 MATRİS NORMLARI / MATRIX NORMS")
+    print(f"Frobenius norm: {A.norm('fro'):.2f}")
+    print(f"Spectral norm: {A.norm('spec'):.2f}")
+    
+    print(f"\n10. 🔷 VEKTÖR UZAYLARI / VECTOR SPACES")
+    print(f"Rank(A): {A.rank()}")
+    print(f"Null space boyutu / Null space dimension: {A.null_space().data.shape}")
+    print(f"Column space boyutu / Column space dimension: {A.column_space().data.shape}")
+    
+    print(f"\n11. 🔷 İLERİ UYGULAMALAR / ADVANCED APPLICATIONS")
+    print(f"Pozitif tanımlı mı? / Positive definite? {A.is_positive_definite()}")
+    print(f"Simetrik mi? / Symmetric? {A.is_symmetric()}")
+    print(f"Koşul sayısı / Condition number: {A.condition_number():.2f}")
+    
+    # PCA test
+    print(f"\n12. 🔷 PCA UYGULAMASI / PCA APPLICATION")
+    random_data = np.random.randn(100, 5)  # 100 samples, 5 features / 100 örnek, 5 özellik
+    X = PiroLinearAlgebra(random_data, "X")
+    X_pca = X.pca(2)
+    print(f"Orijinal veri / Original data: {X.data.shape}")
+    print(f"PCA sonrası / After PCA: {X_pca.data.shape}")
+    
+    print(f"\n🎉 TÜM LİNEER CEBİR KONULARI TAMAMLANDI! / ALL LINEAR ALGEBRA TOPICS COMPLETED! 🎉")
+
+if __name__ == "__main__":
+    test_complete_linear_algebra()
